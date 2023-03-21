@@ -27,58 +27,55 @@ class AdditiveCouplingLayer(nn.Module):
             nn.Linear(latent_dim, hidden_dim),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.BatchNorm1d(hidden_dim),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.BatchNorm1d(hidden_dim),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.BatchNorm1d(hidden_dim),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.BatchNorm1d(hidden_dim),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.BatchNorm1d(hidden_dim),
             nn.Linear(hidden_dim, latent_dim)
         )
+        self.add_module('NonLinearLayer',self.layer)
         
     def forward(self, x):
-        x1 = self.first_block(x)
-        y1  = self.coupling_law(self.second_block(x), self.layer(self.first_block(x)))
-        cols = []
+        y1 = self.first_block(x)
+        y2  = self.coupling_law(self.second_block(x), self.layer(self.first_block(x)))
+        
+        y = torch.zeros((y1.shape[0], int(y1.shape[1] * 2)))
         if self.partition == 'even':
-            for k in range(y1.shape[1]):
-                cols.append(x1[:,k])
-                cols.append(y1[:,k])
-            if x1.shape[1] > y1.shape[1]:
-                cols.append(x1[:,-1])
+            j=0
+            for k in range(y2.shape[1]):
+                y[:,j] = y1[:,k]
+                y[:,j+1] = y2[:,k]
+                j+=2
         else:
-            for k in range(x1.shape[1]):
-                cols.append(y1[:,k])
-                cols.append(x1[:,k])
-            if y1.shape[1] > x1.shape[1]:
-                cols.append(y1[:,-1])
-        return torch.stack(cols, dim=1)
+            j=0
+            for k in range(y1.shape[1]):
+                y[:,j] = y2[:,k]
+                y[:,j+1] = y1[:,k]
+                j+=2
+        return y
 
     def inverse(self, y):
-        y1 = self.first_block(y)
+        x1 = self.first_block(y)
         x2 = self.anticoupling_law(self.second_block(y), self.layer(self.first_block(y)))
 
-        cols = []
+        x = torch.zeros((x1.shape[0], int(x1.shape[1] * 2)))
         if self.partition == 'even':
+            j=0
             for k in range(x2.shape[1]):
-                cols.append(y1[:,k])
-                cols.append(x2[:,k])
-            if y1.shape[1] > x2.shape[1]:
-                cols.append(y1[:,-1])
+                x[:,j] = x1[:,k]
+                x[:,j+1] = x2[:,k]
+                j+=2
         else:
-            for k in range(y1.shape[1]):
-                cols.append(x2[:,k])
-                cols.append(y1[:,k])
-            if x2.shape[1] > y1.shape[1]:
-                cols.append(x2[:,-1])
-        return torch.stack(cols, dim=1)
+            j=0
+            for k in range(x1.shape[1]):
+                x[:,j] = x2[:,k]
+                x[:,j+1] = x1[:,k]
+                j+=2
+        return x
         
     def coupling_law(self, a, b):
         return (a + b)
