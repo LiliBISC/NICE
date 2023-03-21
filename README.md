@@ -5,6 +5,8 @@
 NICE is a generative model that introduces simple flows called "Coupling layers".
 The original implementation can be found on Laurent Dinh github: https://github.com/laurent-dinh/nice
 
+A description through a poster can be found on this Github, see the [poster here](https://github.com/LiliBISC/NICE/blob/main/Poster_NICE.pdf).
+
 # Context
 
 This implementation was done in the context of the master course "Advanced Topics in Deep Learning" at Ecole polytechnique.
