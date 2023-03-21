@@ -1,4 +1,4 @@
-# An implementation of NICE: Non-linear Independent Components Estimation
+# NICE: Non-linear Independent Components Estimation
 
 ["NICE: Non-linear independent components estimation"](https://arxiv.org/abs/1410.8516v6), Laurent Dinh, David Krueger, Yoshua Bengio. ArXiv 2014.
 
